@@ -4,6 +4,7 @@ use web_sys::WebGlRenderingContext as GL;
 use wasm_bindgen::JsValue;
 use nalgebra::{Matrix4,Perspective3};
 
+
 pub fn init_gfx(document: &Document) -> Result<WebGlRenderingContext, JsValue>{
     let canvas = document.get_element_by_id("rustCanvas").unwrap();
     let canvas: web_sys::HtmlCanvasElement = canvas.dyn_into::<web_sys::HtmlCanvasElement>()?;
@@ -16,6 +17,8 @@ pub fn init_gfx(document: &Document) -> Result<WebGlRenderingContext, JsValue>{
 
     gl.clear_color(0.0, 0.5, 0.0, 1.0);
     gl.clear_depth(1.);
+
+
 
     render(&gl);
 
@@ -61,3 +64,4 @@ fn link_program(gl : &GL, vert_src: &str, frag_src: &str) -> Result<WebGlProgram
             .unwrap_or_else(|| String::from("Unknown error creating program object")))
     }
 }
+
