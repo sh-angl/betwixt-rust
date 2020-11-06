@@ -5,11 +5,9 @@ use web_sys:: {WebSocket, MessageEvent, ErrorEvent};
 
 #[macro_use]
 mod dev_utils;
-
+mod gfx;
 
 mod controls;
-
-mod gfx;
 
 
 
@@ -19,7 +17,7 @@ pub fn initialise() -> Result<(), JsValue> {
 
     let document = web_sys::window().unwrap().document().unwrap();
     controls::init_controls(&document);
-    gfx::init_gfx(&document);
+    gfx::utils::init_gfx(&document);
     
 
 

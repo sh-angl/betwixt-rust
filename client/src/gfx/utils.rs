@@ -27,6 +27,7 @@ pub fn init_gfx(document: &Document) -> Result<WebGlRenderingContext, JsValue>{
 }
 
 pub fn render(gl: &GL){
+    link_program( &gl, &"", &"");
     gl.clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT );
 
 }
