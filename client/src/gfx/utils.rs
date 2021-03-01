@@ -6,16 +6,14 @@ use nalgebra::{Matrix4,Perspective3};
 use wasm_bindgen_futures as wasm_futures;
 use futures;
 
-async fn imgFutureWrapper(){
 
-}
 
-fn load_image(img_elem: &HtmlImageElement) /*-> Result<JsValue, JsValue>*/{
-    let closure_await = wasm_bindgen::closure::Closure::wrap(Box::new(||{} as Box<dyn FnMut()>));
-    let image_future = wasm_futures::JsFuture::from(img_elem.decode()/*.then(&closure_await)*/);
-    let thing = wasm_futures::spawn_local(image_future);
-    // Ok()
-}
+// fn load_image(img_elem: &HtmlImageElement) /*-> Result<JsValue, JsValue>*/{
+//     let closure_await = wasm_bindgen::closure::Closure::wrap(Box::new(||{} as Box<dyn FnMut()>));
+//     let image_future = wasm_futures::JsFuture::from(img_elem.decode()/*.then(&closure_await)*/);
+//     let thing = wasm_futures::spawn_local(image_future);
+//     // Ok()
+// }
 
 pub fn init_gfx(document: &Document) -> Result<WebGlRenderingContext, JsValue>{
     let canvas = document.get_element_by_id("rustCanvas").unwrap();
@@ -35,7 +33,7 @@ pub fn init_gfx(document: &Document) -> Result<WebGlRenderingContext, JsValue>{
 
     let image_stuff = document.get_element_by_id("image").unwrap().dyn_into::<web_sys::HtmlImageElement>()?;
 
-    load_image(&image_stuff); //this should block until it isloaded afaik
+    // load_image(&image_stuff); //this should block until it isloaded afaik
 
     // wasm_futures::spawn_local(image_future);
 

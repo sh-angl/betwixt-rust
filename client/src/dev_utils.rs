@@ -19,6 +19,7 @@ struct toilet<T: std::fmt::Debug>{
 
 #[macro_export(console_log)]
 macro_rules! console_log {
-    ($($t:tt)*) => (unsafe{crate::dev_utils::log(&format_args!($($t)*).to_string())})
+    ($($t:tt)*) => (
+        unsafe{crate::dev_utils::log(&format_args!($($t)*).to_string())})
 }
 

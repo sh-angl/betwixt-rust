@@ -10,7 +10,7 @@ mod gfx;
 mod controls;
 
 
-
+#[allow(unused_unsafe)]
 #[wasm_bindgen(start)]
 pub fn initialise() -> Result<(), JsValue> {
     console_error_panic_hook::set_once();
