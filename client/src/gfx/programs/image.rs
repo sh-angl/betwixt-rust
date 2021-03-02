@@ -27,7 +27,7 @@ impl Image{
             vert::texCords::SHADER,
             frag::color_from_texture::SHADER,
             
-        ).expect("yikes");
+        ).expect("failed to link shader program");
 
 //       use set_program
         gl.use_program(Some(&program));

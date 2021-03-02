@@ -17,13 +17,14 @@ pub fn initialise() -> Result<(), JsValue> {
 
     let document = web_sys::window().unwrap().document().unwrap();
     controls::init_controls(&document);
+    console_log!("lets init gfx");
     gfx::utils::init_gfx(&document);
     
 
 
 
 
-    console_log!("yeah");
+    console_log!("yeahhh");
 
 
 
