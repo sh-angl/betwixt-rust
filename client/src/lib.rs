@@ -24,7 +24,7 @@ pub fn initialise() -> Result<(), JsValue> {
 
 
 
-    console_log!("yeahhh");
+    console_log!("yeah");
 
 
 

@@ -24,7 +24,7 @@ impl Image{
         console_log!("starts that thing bb");
 
         let program = utils::link_program(&gl,
-            vert::texCords::SHADER,
+            vert::first::SHADER,
             frag::color_from_texture::SHADER,
             
         ).expect("failed to link shader program");
@@ -34,41 +34,71 @@ impl Image{
 
         
         // let image = ;
-        let tex_coord_location : u32 = gl.get_attrib_location(&program, &"a_texCoord") as u32;
 
-        let tex_coord_buffer = gl.create_buffer().unwrap();
-
-        let optionated: Option<&WebGlBuffer> = Some(&tex_coord_buffer);
-
-        gl.bind_buffer(GL::ARRAY_BUFFER, optionated);
-
+        let vert_buffer = gl.create_buffer().unwrap();
+        gl.bind_buffer(GL::ARRAY_BUFFER, Some(&vert_buffer));
         unsafe{
             let vert_array = js_sys::Float32Array::view(&[      
-                0.0,  0.0,
-                1.0,  0.0,
-                0.0,  1.0,
-                0.0,  1.0,
-                1.0,  0.0,
-                1.0,  1.0]);
+                -1.0, -1.0, 0.0,
+                 1.0, -1.0, 0.0,
+                
+                -1.0, 1.0, 0.0,
+                 1.0, 1.0, 0.0
+            ]);
 
             gl.buffer_data_with_array_buffer_view(GL::ARRAY_BUFFER, &vert_array, GL::STATIC_DRAW);
         }
 
+        let vert_pos_loc : u32 = gl.get_attrib_location(&program, &"a_vertexPosition") as u32;
+        gl.vertex_attrib_pointer_with_i32(vert_pos_loc, 3, GL::FLOAT, false, 0, 0);
+        gl.enable_vertex_attrib_array(vert_pos_loc);
+
+        let tri_buffer = gl.create_buffer().unwrap();
+        gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&tri_buffer));
+        unsafe {
+            let tri_array = js_sys::Uint16Array::view(&[
+                0, 1, 2,
+                2, 1, 3
+            ]);
+
+            gl.buffer_data_with_array_buffer_view(GL::ELEMENT_ARRAY_BUFFER, &tri_array, GL::STATIC_DRAW);
+        }
+
+        
+
+        let tex_coord_buffer = gl.create_buffer().unwrap();
+        gl.bind_buffer(GL::ARRAY_BUFFER, Some(&tex_coord_buffer));
+        
+
+        unsafe {
+            let uv_arr = js_sys::Float32Array::view(&[
+                0., 1.,
+                1., 1.,
+                0., 0.,
+                1., 0.
+            ]);
+            gl.buffer_data_with_array_buffer_view(GL::ARRAY_BUFFER, &uv_arr, GL::STATIC_DRAW);
+        }
+
+        let tex_coord_location : u32 = gl.get_attrib_location(&program, &"a_texCoord") as u32;
+        gl.vertex_attrib_pointer_with_i32(tex_coord_location, 2, GL::FLOAT, false, 0, 0);
         gl.enable_vertex_attrib_array(tex_coord_location);
 
-        gl.vertex_attrib_pointer_with_i32(tex_coord_location, 2, GL::FLOAT, false, 0, 0);
+        let tint_loc = gl.get_uniform_location(&program, &"u_tint").unwrap();
+        gl.uniform4fv_with_f32_array(Some(&tint_loc), &[1., 0., 0., 1.]);
 
+        
+        let tex = gl.create_texture().unwrap();
+        gl.active_texture(GL::TEXTURE0);
+        gl.bind_texture(GL::TEXTURE_2D, Some(&tex));
+        gl.tex_image_2d_with_u32_and_u32_and_image(GL::TEXTURE_2D, 0, GL::RGBA as i32, GL::RGBA ,GL::UNSIGNED_BYTE, &img).unwrap();
+        
         gl.tex_parameteri(GL::TEXTURE_2D, GL::TEXTURE_WRAP_S, GL::CLAMP_TO_EDGE as i32);
         gl.tex_parameteri(GL::TEXTURE_2D, GL::TEXTURE_WRAP_T, GL::CLAMP_TO_EDGE as i32);
         gl.tex_parameteri(GL::TEXTURE_2D, GL::TEXTURE_MIN_FILTER, GL::NEAREST as i32);
         gl.tex_parameteri(GL::TEXTURE_2D, GL::TEXTURE_MAG_FILTER, GL::NEAREST as i32);
 
-        gl.tex_image_2d_with_u32_and_u32_and_image(GL::TEXTURE_2D, 0, GL::RGBA as i32, GL::RGBA ,GL::UNSIGNED_BYTE, &img).unwrap();
-
-        let primitive_type = GL::TRIANGLES;
-        let offset = 0;
-        let count = 0;
-        gl.draw_arrays(primitive_type, offset, count); 
+        gl.draw_elements_with_i32(GL::TRIANGLES, 6, GL::UNSIGNED_SHORT, 0);
         console_log!("maybe image onscreen now");     
 
 

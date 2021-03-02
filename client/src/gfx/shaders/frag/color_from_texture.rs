@@ -3,6 +3,7 @@ pub const SHADER: &str = r#"
     
     // our texture
     uniform sampler2D u_image;
+    uniform vec4 u_tint;
     
     // the texCoords passed in from the vertex shader.
     varying vec2 v_texCoord;
@@ -10,6 +11,6 @@ pub const SHADER: &str = r#"
     
     void main() {
         // Look up a color from the texture.
-        gl_FragColor = texture2D(u_image, v_texCoord);
+        gl_FragColor = texture2D(u_image, v_texCoord) * u_tint;
     }
 "#;

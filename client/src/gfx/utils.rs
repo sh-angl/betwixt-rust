@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+
 use wasm_bindgen::JsCast;
 use web_sys::*;
 use web_sys::WebGlRenderingContext as GL;
@@ -40,7 +42,7 @@ pub fn init_gfx(document: &Document) -> Result<WebGlRenderingContext, JsValue>{
     console_log!("cloned gl");
 
     let image_stuff = document.get_element_by_id("image").unwrap().dyn_into::<web_sys::HtmlImageElement>()?;
-    console_log!("got image");
+    console_log!("got image {}", image_stuff);
 
     // load_image(&image_stuff); //this should block until it isloaded afaik
 
