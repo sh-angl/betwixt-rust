@@ -4,11 +4,11 @@ pub const SHADER: &str = r#"
     
     varying vec2 v_texCoord;
 
-    uniform mat4 u_ModelViewMatrix;
-    uniform mat4 u_ProjectionMatrix;
+    uniform mat4 u_mMatrix;
+    uniform mat4 u_vpMatrix;
 
     void main() {
-        gl_Position = a_vertexPosition;
+        gl_Position = a_vertexPosition * u_mMatrix;
         v_texCoord = a_texCoord;
         // gl_Position = u_ProjectionMatrix * u_ModelViewMatrix * a_VertexPosition;
     }

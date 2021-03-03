@@ -3,22 +3,79 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys:: {WebSocket, MessageEvent, ErrorEvent};
 
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+
+use std::cell::RefCell;
+use std::rc::Rc;
+
 #[macro_use]
 mod dev_utils;
 mod gfx;
 
 mod controls;
+mod evloop;
+mod scene;
+mod state;
 
+pub fn window() -> web_sys::Window {
+    web_sys::window().expect("no global `window` exists")
+}
+
+pub fn request_animation_frame(f: &Closure<dyn FnMut()>) {
+    window()
+        .request_animation_frame(f.as_ref().unchecked_ref())
+        .expect("should register `requestAnimationFrame` OK");
+}
+
+pub fn document() -> web_sys::Document {
+    window()
+        .document()
+        .expect("should have a document on window")
+}
+
+pub fn body() -> web_sys::HtmlElement {
+    document().body().expect("document should have a body")
+}
 
 #[allow(unused_unsafe)]
 #[wasm_bindgen(start)]
 pub fn initialise() -> Result<(), JsValue> {
     console_error_panic_hook::set_once();
 
-    let document = web_sys::window().unwrap().document().unwrap();
+    let mut scene = scene::Scene {
+        sprites: Vec::new(),
+    };
+
+    let mut state = state::State {
+        time: 0.,
+        dt: 0.,
+    };
+
+    let document = document();
+    let window = window();
     controls::init_controls(&document);
-    console_log!("lets init gfx");
-    gfx::utils::init_gfx(&document);
+    let gl =  gfx::utils::init_gfx(&document, &mut scene).unwrap();
+
+    // start event loop
+    let func = Rc::new(RefCell::new(None));
+    let g = func.clone();
+
+    let perf = window.performance().expect("window.performance should be available");
+
+    //let scene_ref = Rc::new(scene);
+
+    let mut then = perf.now();
+    let mut now = perf.now();
+    *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
+        now = perf.now();
+        state.dt = (now-then)/1000.;
+        state.time += state.dt;
+        evloop::tick(&state, &scene);
+        evloop::draw(&gl, &state, &scene);
+        request_animation_frame(func.borrow().as_ref().unwrap()); // schedule next frame
+        then = now;
+    }) as Box<dyn FnMut()>));
+    request_animation_frame(g.borrow().as_ref().unwrap());
     
 
 

@@ -20,24 +20,28 @@ futures = "0.3.8"
 [dependencies.web-sys]
 version = "0.3.45"
 features = [
+    "console",
     'Document',
+    'Window',
     'Element',
-    'EventTarget',
+    'Node',
+    'Performance',
+    'HtmlElement',
     'HtmlCanvasElement',
+    "HtmlImageElement",
+    'EventTarget',
+    "EventListener",
     'MouseEvent',
+    "ErrorEvent",
+    "MessageEvent",
+    "KeyboardEvent",
+    "WebSocket",
+    "BinaryType",
+
     'WebGlBuffer',
     'WebGlProgram',
     'WebGlRenderingContext',
     'WebGlTexture',
     'WebGlShader',
     'WebGlUniformLocation',
-    'Window',
-    "WebSocket",
-    "BinaryType",
-    "MessageEvent",
-    "ErrorEvent",
-    "KeyboardEvent",
-    "console",
-    "EventListener",
-    "HtmlImageElement"
 ]

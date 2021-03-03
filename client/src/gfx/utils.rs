@@ -1,4 +1,5 @@
 use std::borrow::Borrow;
+use std::rc::Rc;
 
 use wasm_bindgen::JsCast;
 use web_sys::*;
@@ -8,6 +9,7 @@ use nalgebra::{Matrix4,Perspective3};
 use wasm_bindgen_futures as wasm_futures;
 use futures;
 
+use crate::scene::Scene;
 
 
 // fn load_image(img_elem: &HtmlImageElement) /*-> Result<JsValue, JsValue>*/{
@@ -18,7 +20,7 @@ use futures;
 // }
 
 #[allow(unused_unsafe)]
-pub fn init_gfx(document: &Document) -> Result<WebGlRenderingContext, JsValue>{
+pub fn init_gfx(document: &Document, scene: &mut Scene) -> Result<WebGlRenderingContext, JsValue>{
     console_log!("initing gfx");
     let canvas = document.get_element_by_id("rustCanvas").unwrap();
     console_log!("got canvas el");
@@ -26,39 +28,30 @@ pub fn init_gfx(document: &Document) -> Result<WebGlRenderingContext, JsValue>{
     console_log!("got el again");
     let gl: WebGlRenderingContext = canvas.get_context("webgl")?.unwrap().dyn_into()?;
     console_log!("got gl context");
-
+    
     gl.enable(GL::BLEND);
     gl.blend_func(GL::SRC_ALPHA, GL::ONE_MINUS_SRC_ALPHA);
 
-
-    console_log!("clearing..");
-    gl.clear_color(0.0, 0.5, 0.0, 1.0);
-    gl.clear_depth(1.);
-    console_log!("cleared");
-
-    render(&gl);
-    console_log!("rendered");
-    let other_gl = gl.clone();
-    console_log!("cloned gl");
+    //render(&gl);
+    // console_log!("rendered");
+    // let other_gl = gl.clone();
+    // console_log!("cloned gl");
 
     let image_stuff = document.get_element_by_id("image").unwrap().dyn_into::<web_sys::HtmlImageElement>()?;
-    console_log!("got image {}", image_stuff.src());
+    // console_log!("got image {}", image_stuff.src());
 
     // load_image(&image_stuff); //this should block until it isloaded afaik
 
     // wasm_futures::spawn_local(image_future);
 
-    let thing = super::programs::image::Image::new(&other_gl, image_stuff);
+    let thing = super::programs::sprite::Sprite::new(&gl, image_stuff);
+    scene.sprites.push(Rc::new(thing));
+    
     console_log!("new image");
 
     // thing.render(&gl);
 
     Ok(gl)
-
-}
-
-pub fn render(gl: &GL){
-    gl.clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT );
 
 }
 

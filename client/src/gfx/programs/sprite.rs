@@ -1,3 +1,4 @@
+use nalgebra::{Translation3, Vector3};
 use wasm_bindgen::{JsCast};
 use web_sys::WebGlRenderingContext as GL;
 use web_sys::*;
@@ -15,14 +16,25 @@ use std::future::Future;
 use std::cell::Cell;
 use std::rc::Rc;
 
-pub struct Image{
-    program: WebGlProgram
+pub struct Sprite {
+    // vertices: &'static js_sys::Float32Array,
+    // triangles: &'static js_sys::Uint16Array,
+    // uvs: &'static js_sys::Float32Array,
+
+    program: WebGlProgram,
+    vertex_buf: WebGlBuffer,
+    triangle_buf: WebGlBuffer,
+    uv_buf: WebGlBuffer,
+    texture: WebGlTexture,
 }
 
-impl Image{
-    pub fn new(gl: &GL, img: HtmlImageElement) -> Self{
-        console_log!("starts that thing bb");
 
+
+impl Sprite {
+    pub fn init(gl: &GL) {
+        // TODO: move vert/tri/uv buffer to statics and init them here
+    }
+    pub fn new(gl: &GL, img: HtmlImageElement) -> Self{
         let program = utils::link_program(&gl,
             vert::first::SHADER,
             frag::color_from_texture::SHADER,
@@ -49,9 +61,6 @@ impl Image{
             gl.buffer_data_with_array_buffer_view(GL::ARRAY_BUFFER, &vert_array, GL::STATIC_DRAW);
         }
 
-        let vert_pos_loc : u32 = gl.get_attrib_location(&program, &"a_vertexPosition") as u32;
-        gl.vertex_attrib_pointer_with_i32(vert_pos_loc, 3, GL::FLOAT, false, 0, 0);
-        gl.enable_vertex_attrib_array(vert_pos_loc);
 
         let tri_buffer = gl.create_buffer().unwrap();
         gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&tri_buffer));
@@ -80,12 +89,6 @@ impl Image{
             gl.buffer_data_with_array_buffer_view(GL::ARRAY_BUFFER, &uv_arr, GL::STATIC_DRAW);
         }
 
-        let tex_coord_location : u32 = gl.get_attrib_location(&program, &"a_texCoord") as u32;
-        gl.vertex_attrib_pointer_with_i32(tex_coord_location, 2, GL::FLOAT, false, 0, 0);
-        gl.enable_vertex_attrib_array(tex_coord_location);
-
-        let tint_loc = gl.get_uniform_location(&program, &"u_tint").unwrap();
-        gl.uniform4fv_with_f32_array(Some(&tint_loc), &[1., 0., 0., 1.]);
 
         
         let tex = gl.create_texture().unwrap();
@@ -98,18 +101,52 @@ impl Image{
         gl.tex_parameteri(GL::TEXTURE_2D, GL::TEXTURE_MIN_FILTER, GL::NEAREST as i32);
         gl.tex_parameteri(GL::TEXTURE_2D, GL::TEXTURE_MAG_FILTER, GL::NEAREST as i32);
 
-        gl.draw_elements_with_i32(GL::TRIANGLES, 6, GL::UNSIGNED_SHORT, 0);
-        console_log!("maybe image onscreen now");     
-
 
 
         Self{
-            program: program
+            program: program,
+            vertex_buf: vert_buffer,
+            triangle_buf: tri_buffer,
+            uv_buf: tex_coord_buffer,
+            texture: tex,
         }
     }
 
-    pub fn render(&self, gl: GL){
+    pub fn render(&self, gl: &GL, position: &Vector3<f32>){
+        gl.use_program(Some(&self.program));
+        
+        // vertex params
+        gl.bind_buffer(GL::ARRAY_BUFFER, Some(&self.vertex_buf));
+        let vert_pos_loc : u32 = gl.get_attrib_location(&self.program, &"a_vertexPosition") as u32;
+        gl.vertex_attrib_pointer_with_i32(vert_pos_loc, 3, GL::FLOAT, false, 0, 0);
+        gl.enable_vertex_attrib_array(vert_pos_loc);
+        
+        // uv params
+        gl.bind_buffer(GL::ARRAY_BUFFER, Some(&self.uv_buf));
+        let tex_coord_location : u32 = gl.get_attrib_location(&self.program, &"a_texCoord") as u32;
+        gl.vertex_attrib_pointer_with_i32(tex_coord_location, 2, GL::FLOAT, false, 0, 0);
+        gl.enable_vertex_attrib_array(tex_coord_location);
 
+        // tint uniform
+        let tint_loc = gl.get_uniform_location(&self.program, &"u_tint").unwrap();
+        gl.uniform4fv_with_f32_array(Some(&tint_loc), &[1., 1., 1., 1.]);
+
+        // model proj matrix
+        let model_loc = gl.get_uniform_location(&self.program, &"u_mMatrix").unwrap();
+        let model = Translation3::new(position.x, position.y, position.z);
+        let mut model_array = [0.; 16];
+        model_array.copy_from_slice(model.to_homogeneous().as_slice());
+        gl.uniform_matrix4fv_with_f32_array(Some(&model_loc), false, &model_array);
+
+        // triangle params
+        gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&self.triangle_buf));
+        
+        // tex params
+        gl.active_texture(GL::TEXTURE0);
+        gl.bind_texture(GL::TEXTURE_2D, Some(&self.texture));
+
+        // actually draw
+        gl.draw_elements_with_i32(GL::TRIANGLES, 6, GL::UNSIGNED_SHORT, 0);
     }
 }
 
