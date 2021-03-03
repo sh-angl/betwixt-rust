@@ -24,7 +24,7 @@ pub fn draw(gl: &GL, state: &State, scene: &Scene) {
   gl.clear(GL::COLOR_BUFFER_BIT | GL::DEPTH_BUFFER_BIT );
 
   scene.sprites.iter().clone().for_each(|spr: &Rc<Sprite>| {
-    spr.render(gl, &Vector3::new(0., state.time.sin() as f32, 0.));
+    spr.render(gl, &state.camera, &Vector3::new(0., state.time.sin() as f32, 0.));
   });
 
   // body().set_text_content(Some(&format!("dt: {}", dt)));

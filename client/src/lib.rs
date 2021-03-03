@@ -16,6 +16,7 @@ mod controls;
 mod evloop;
 mod scene;
 mod state;
+mod camera;
 
 pub fn window() -> web_sys::Window {
     web_sys::window().expect("no global `window` exists")
@@ -49,6 +50,7 @@ pub fn initialise() -> Result<(), JsValue> {
     let mut state = state::State {
         time: 0.,
         dt: 0.,
+        camera: camera::Camera::new(),
     };
 
     let document = document();

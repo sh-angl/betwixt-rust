@@ -1,4 +1,4 @@
-use nalgebra::{Translation3, Vector3};
+use nalgebra::{Matrix4, Translation3, Vector3};
 use wasm_bindgen::{JsCast};
 use web_sys::WebGlRenderingContext as GL;
 use web_sys::*;
@@ -6,9 +6,10 @@ use js_sys::Promise;
 use wasm_bindgen_futures::*;
 use wasm_bindgen::prelude::*;
 
-use super::super::utils;
-use super::super::shaders::{frag, vert};
+use crate::camera::Camera;
 
+use super::super::{utils};
+use super::super::shaders::{frag, vert};
 // imports for stolen imageFuture code
 use futures::task::{Context, Poll};
 use std::pin::Pin;
@@ -112,7 +113,7 @@ impl Sprite {
         }
     }
 
-    pub fn render(&self, gl: &GL, position: &Vector3<f32>){
+    pub fn render(&self, gl: &GL, camera: &Camera, position: &Vector3<f32>){
         gl.use_program(Some(&self.program));
         
         // vertex params
@@ -137,6 +138,15 @@ impl Sprite {
         let mut model_array = [0.; 16];
         model_array.copy_from_slice(model.to_homogeneous().as_slice());
         gl.uniform_matrix4fv_with_f32_array(Some(&model_loc), false, &model_array);
+
+        
+        // view matrix
+        let loc = gl.get_uniform_location(&self.program, &"u_vMatrix").unwrap();
+        gl.uniform_matrix4fv_with_f32_array(Some(&loc), false, &camera.view());
+
+        // projection matrix
+        let loc = gl.get_uniform_location(&self.program, &"u_pMatrix").unwrap();
+        gl.uniform_matrix4fv_with_f32_array(Some(&loc), false, &camera.projection());
 
         // triangle params
         gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&self.triangle_buf));
