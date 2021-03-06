@@ -1,3 +1,5 @@
+use std::ptr::null;
+
 use web_sys::{EventListener, MouseEvent, Window, FocusEvent, WheelEvent};
 use web_sys::KeyboardEvent;
 use web_sys::{Document};
@@ -43,7 +45,7 @@ fn mousescroll(event: WheelEvent) {
   //console_log!("zoom: {}", new_zoom);
 }
 
-fn resize(_event: FocusEvent) { // FIXME: window resize debouncing
+fn resize() { // FIXME: window resize debouncing
   let win = window();
   let mut state = STATE.lock().unwrap();
   let width = win.inner_width().unwrap().as_f64().unwrap();
@@ -81,8 +83,9 @@ pub fn init_controls(document: &Document, window: &Window){
     document.add_event_listener_with_callback("wheel", handle.as_ref().unchecked_ref());
     handle.forget();
 
-    let handle = Closure::wrap(Box::new(resize) as Box<dyn FnMut(FocusEvent)>);
+    let handle = Closure::wrap(Box::new(resize) as Box<dyn FnMut()>);
     window.add_event_listener_with_callback("resize", handle.as_ref().unchecked_ref());
+    resize();
     handle.forget();
     
 }
