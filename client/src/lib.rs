@@ -1,3 +1,6 @@
+use gfx::programs::sprite;
+use scene::Scene;
+use state::State;
 use wasm_bindgen;
 use wasm_bindgen::prelude::*; 
 use wasm_bindgen::JsCast;
@@ -7,6 +10,10 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::Mutex;
+
+#[macro_use]
+extern crate lazy_static;
 
 #[macro_use]
 mod dev_utils;
@@ -38,6 +45,15 @@ pub fn body() -> web_sys::HtmlElement {
     document().body().expect("document should have a body")
 }
 
+lazy_static! {
+    pub static ref STATE: Mutex<State> = Mutex::new(State {
+        time: 0.,
+        dt: 0.,
+        camera: camera::Camera::new(),
+        dirty_screen: false,
+    });
+}
+
 #[allow(unused_unsafe)]
 #[wasm_bindgen(start)]
 pub fn initialise() -> Result<(), JsValue> {
@@ -47,15 +63,9 @@ pub fn initialise() -> Result<(), JsValue> {
         sprites: Vec::new(),
     };
 
-    let mut state = state::State {
-        time: 0.,
-        dt: 0.,
-        camera: camera::Camera::new(),
-    };
-
     let document = document();
     let window = window();
-    controls::init_controls(&document);
+    controls::init_controls(&document, &window);
     let gl =  gfx::utils::init_gfx(&document, &mut scene).unwrap();
 
     // start event loop
@@ -70,10 +80,11 @@ pub fn initialise() -> Result<(), JsValue> {
     let mut now = perf.now();
     *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
         now = perf.now();
+        let mut state = STATE.lock().unwrap();
         state.dt = (now-then)/1000.;
         state.time += state.dt;
         evloop::tick(&state, &scene);
-        evloop::draw(&gl, &state, &scene);
+        evloop::draw(&gl, &mut state, &scene);
         request_animation_frame(func.borrow().as_ref().unwrap()); // schedule next frame
         then = now;
     }) as Box<dyn FnMut()>));

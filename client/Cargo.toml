@@ -35,6 +35,8 @@ features = [
     "ErrorEvent",
     "MessageEvent",
     "KeyboardEvent",
+    "FocusEvent",
+    "WheelEvent",
     "WebSocket",
     "BinaryType",
 

@@ -1,4 +1,4 @@
-use std::borrow::Borrow;
+use std::{borrow::Borrow, sync::Arc};
 use std::rc::Rc;
 
 use wasm_bindgen::JsCast;
@@ -10,7 +10,6 @@ use wasm_bindgen_futures as wasm_futures;
 use futures;
 
 use crate::scene::Scene;
-
 
 // fn load_image(img_elem: &HtmlImageElement) /*-> Result<JsValue, JsValue>*/{
 //     let closure_await = wasm_bindgen::closure::Closure::wrap(Box::new(||{} as Box<dyn FnMut()>));
@@ -45,7 +44,7 @@ pub fn init_gfx(document: &Document, scene: &mut Scene) -> Result<WebGlRendering
     // wasm_futures::spawn_local(image_future);
 
     let thing = super::programs::sprite::Sprite::new(&gl, image_stuff);
-    scene.sprites.push(Rc::new(thing));
+    scene.sprites.push(Arc::new(thing));
     
     console_log!("new image");
 
