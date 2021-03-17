@@ -1,5 +1,7 @@
 use serde::{Serialize, Deserialize};
 
+pub mod game_state;
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Player{
     pos: Vector<f64>

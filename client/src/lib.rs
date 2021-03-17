@@ -1,3 +1,4 @@
+use common::game_state::GameState;
 use gfx::programs::sprite;
 use scene::Scene;
 use state::State;
@@ -51,6 +52,9 @@ lazy_static! {
         dt: 0.,
         camera: camera::Camera::new(),
         dirty_screen: false,
+        game_state: GameState {
+            players: Vec::new()
+        }
     });
 }
 
