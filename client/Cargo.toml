@@ -19,7 +19,7 @@ common = { path = "../common" }
 
 
 [dependencies.web-sys]
-version = "0.3.45"
+version = "0.3.49"
 features = [
     "console",
     'Document',
