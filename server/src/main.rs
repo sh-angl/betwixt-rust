@@ -1,6 +1,7 @@
 use tokio;
 use tokio::net::{TcpListener, TcpStream};
-// use tokio::net::TcpStream::{split};
+use tokio::net::*;
+// use futures_util::stream::stream::StreamExt;
 
 use async_tungstenite::tungstenite::Message;
 
@@ -18,15 +19,23 @@ use std::{
     net::SocketAddr
 };
 
+use futures::prelude::*;
+
 
 async fn handle_connection(raw_stream: TcpStream, addr: SocketAddr) -> Result<(), TsError>{
     println!("Incoming TCP connection from: {}", addr);
 
     let ws_stream = tokio_ts::accept_async(raw_stream).await.expect("bro");
 
+    
     let (outgoing, incoming) = ws_stream.split();
 
-    
+    let _thing  = incoming.try_for_each(|msg| async move{
+        println!("{:?}", msg.into_text());
+
+        Ok(())
+    });
+
     Ok(())
     
 } 
