@@ -28,9 +28,19 @@ async fn handle_connection(raw_stream: TcpStream, addr: SocketAddr) -> Result<()
     let ws_stream = tokio_ts::accept_async(raw_stream).await.expect("bro");
 
     
-    let (outgoing, incoming) = ws_stream.split();
+    let (mut outgoing, incoming) = ws_stream.split();
 
+    outgoing.send(Message::Ping(vec!())).await?;
+
+    println!("assigning the callback");
     let _thing  = incoming.try_for_each(|msg| async move{
+        println!("running callback");
+        match msg{
+            Message::Ping(_) => {println!("Pinged by client");
+                },
+            _=> ()
+        }
+        
         println!("{:?}", msg.into_text());
 
         Ok(())
