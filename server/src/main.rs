@@ -37,14 +37,16 @@ async fn handle_connection(raw_stream: TcpStream, addr: SocketAddr) -> Result<()
         match msg{
             Message::Ping(_) => {println!("Pinged by client");
                 },
+            Message::Binary(thing) => {println!("{:?}", thing[0] as u8);
+                }
             _=> ()
         }
         
-        println!("{:?}", msg.into_text());
+        // println!("{:?}", msg.into_data()[0] as u8);
 
         Ok(())
     });
-    broadcast_incoming.await;
+    broadcast_incoming.await?;
 
     // future::select(broadcast_incoming, future2).await;
 
