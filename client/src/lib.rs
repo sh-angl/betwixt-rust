@@ -127,10 +127,9 @@ pub fn initialise() -> Result<(), JsValue> {
     ws.set_onopen(Some(onopen_callback.as_ref().unchecked_ref()));
     onopen_callback.forget();
 
+    let cloned_ws = ws.clone();
 
-    
-
-
+    let mut count = 0_u8;
 
     // start event loop
     let func = Rc::new(RefCell::new(None));
@@ -151,6 +150,15 @@ pub fn initialise() -> Result<(), JsValue> {
         evloop::draw(&gl, &mut state, &scene);
         request_animation_frame(func.borrow().as_ref().unwrap()); // schedule next frame
         then = now;
+
+
+        // ws tick send hopefully
+        match cloned_ws.send_with_u8_array(&[count]){
+            Ok(_) => console_log!("binary message successfully sent"),
+            Err(err) => console_log!("error sending message: {:?}", err),
+        }
+        count = count.overflowing_add(1_u8).0;
+
     }) as Box<dyn FnMut()>));
     request_animation_frame(g.borrow().as_ref().unwrap());
     
